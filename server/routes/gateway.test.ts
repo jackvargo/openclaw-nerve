@@ -5,8 +5,8 @@ import { Hono } from 'hono';
 let execFileImpl: (...args: unknown[]) => void;
 let invokeGatewayImpl: (tool: string, args: Record<string, unknown>) => unknown;
 
-vi.mock(import('node:child_process'), async (importOriginal) => {
-  const actual = await importOriginal();
+vi.mock('node:child_process', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:child_process')>();
   const mock = { ...actual, execFile: (...args: unknown[]) => execFileImpl(...args) };
   return { ...mock, default: mock };
 });

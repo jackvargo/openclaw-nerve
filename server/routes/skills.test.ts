@@ -4,8 +4,8 @@ import { Hono } from 'hono';
 
 let execFileImpl: (...args: unknown[]) => void;
 
-vi.mock(import('node:child_process'), async (importOriginal) => {
-  const actual = await importOriginal();
+vi.mock('node:child_process', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:child_process')>();
   const mock = { ...actual, execFile: (...args: unknown[]) => execFileImpl(...args) };
   return { ...mock, default: mock };
 });

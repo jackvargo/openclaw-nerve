@@ -72,7 +72,7 @@ describe('authMiddleware', () => {
       const app = createTestApp();
       const res = await app.request('/api/test');
       expect(res.status).toBe(401);
-      const body = await res.json();
+      const body = (await res.json()) as { error: string };
       expect(body.error).toBe('Authentication required');
     });
 
@@ -83,7 +83,7 @@ describe('authMiddleware', () => {
         headers: { Cookie: 'nerve_session_3080=invalid-token' },
       });
       expect(res.status).toBe(401);
-      const body = await res.json();
+      const body = (await res.json()) as { error: string };
       expect(body.error).toBe('Invalid or expired session');
     });
 
