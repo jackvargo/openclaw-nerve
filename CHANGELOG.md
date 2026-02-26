@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Local STT default model is now multilingual `tiny`.
 - Chat rendering now prefers event-first WebSocket updates instead of periodic full-history polling (PR #16).
 - Setup/config flow now uses one bundled consent prompt for OpenClaw gateway config patches, including `gateway.tools.allow` updates for cron management (PR #15).
+- UI is now fully responsive across desktop, tablet, and mobile with adaptive small-screen navigation and controls (PR #24).
 
 ### Fixed
 - Unicode-safe stop/cancel matching for non-Latin scripts (removed brittle `\b` behavior).
@@ -38,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Improved voice-phrase modal reliability (load/save error handling and request-abort race handling).
 - Accessibility: icon-only remove-phrase controls now include accessible labels.
 - `ws-proxy` now enriches `PATH` before `openclaw` CLI calls, fixing restricted RPC methods under nvm/systemd environments (PR #12).
+- Session and memory row actions are now reliably accessible on touch devices (no hover-only dependency) (PR #24).
 
 ### Documentation
 - Updated API, architecture, configuration, troubleshooting, installer notes, and README to match multilingual voice behavior and runtime config.

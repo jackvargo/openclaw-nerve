@@ -40,6 +40,9 @@ Talk to your agent in 12 languages. Explicit language selection (no flaky auto-d
 ### Full workspace visibility
 Your sub-agent sessions, workspace files, memory, config, tools. All visible, all editable, all live. No file hunting, no guessing what it remembers.
 
+### Responsive by default
+Nerve adapts cleanly across desktop, tablet, and mobile, with touch-friendly controls on smaller screens and no core workflow loss.
+
 ### Live charts from a chat message
 Your agent can drop interactive TradingView charts, candlestick plots, and data visualizations directly into the conversation. Say "show me gold this year" and get a real chart, not a code block.
 
@@ -54,6 +57,7 @@ Create recurring jobs and one-shot reminders. Every scheduled run shows up as it
 | **File browser** | Browse your workspace and open files in tabs |
 | **Built-in editor** | CodeMirror editor with syntax highlighting, conflict-safe saves, and automatic lock protection during concurrent agent edits |
 | **Multi-session** | Session tree with sub-agents, per-session model overrides, unread indicators |
+| **Responsive UI** | Fully responsive layout across desktop, tablet, and mobile with touch-friendly controls |
 | **Sub-agents** | Spawn background workers with custom models and reasoning levels |
 | **Monitoring** | Token usage, context window meter, cost tracking, activity logs |
 | **Command palette** | Cmd+K to search, switch sessions, change models. Keyboard-first |
