@@ -65,14 +65,22 @@ function extractJsonPayload(stdout: string): unknown {
     // Fall through to prelude-tolerant parsing.
   }
 
-  // OpenClaw can print warnings before JSON. Parse from first object start.
-  const jsonStart = trimmed.indexOf('{');
-  if (jsonStart >= 0) {
-    const candidate = trimmed.slice(jsonStart).trim();
+  // OpenClaw can print warnings before JSON.
+  // Try parsing from each possible JSON structure start ({ or [).
+  const startIndices: number[] = [];
+  for (let i = 0; i < trimmed.length; i++) {
+    const ch = trimmed[i];
+    if (ch === '{' || ch === '[') {
+      startIndices.push(i);
+    }
+  }
+
+  for (const start of startIndices) {
+    const candidate = trimmed.slice(start).trim();
     try {
       return JSON.parse(candidate);
     } catch {
-      // Fall through to explicit error below.
+      // Keep scanning for the next JSON structure start.
     }
   }
 

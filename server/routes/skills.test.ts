@@ -37,12 +37,13 @@ vi.mock('../lib/openclaw-bin.js', () => ({
   resolveOpenclawBin: () => '/usr/bin/openclaw',
 }));
 
-const GOOD_SKILLS_JSON = JSON.stringify({
-  skills: [
-    { name: 'weather', description: 'Get weather', emoji: '🌤️', eligible: true, disabled: false, blockedByAllowlist: false, source: 'bundled', bundled: true },
-    { name: 'github', description: 'GitHub ops', emoji: '🐙', eligible: true, disabled: false, blockedByAllowlist: false, source: 'bundled', bundled: true },
-  ],
-});
+const RAW_SKILLS = [
+  { name: 'weather', description: 'Get weather', emoji: '🌤️', eligible: true, disabled: false, blockedByAllowlist: false, source: 'bundled', bundled: true },
+  { name: 'github', description: 'GitHub ops', emoji: '🐙', eligible: true, disabled: false, blockedByAllowlist: false, source: 'bundled', bundled: true },
+];
+
+const GOOD_SKILLS_JSON = JSON.stringify({ skills: RAW_SKILLS });
+const GOOD_SKILLS_ARRAY_JSON = JSON.stringify(RAW_SKILLS);
 
 import skillsRoutes from './skills.js';
 
@@ -84,6 +85,35 @@ describe('GET /api/skills', () => {
     const json = (await res.json()) as { ok: boolean; skills: Array<{ name: string }> };
     expect(json.ok).toBe(true);
     expect(json.skills).toHaveLength(2);
+  });
+
+  it('parses skills when warning prelude contains bracket characters', async () => {
+    execFileImpl = (_bin, _args, _opts, cb) => {
+      cb(null, `[warn] duplicate plugin id\n${GOOD_SKILLS_JSON}`, '');
+    };
+
+    const app = buildApp();
+    const res = await app.request('/api/skills');
+
+    expect(res.status).toBe(200);
+    const json = (await res.json()) as { ok: boolean; skills: Array<{ name: string }> };
+    expect(json.ok).toBe(true);
+    expect(json.skills).toHaveLength(2);
+  });
+
+  it('parses top-level skills array when warnings are printed before JSON', async () => {
+    execFileImpl = (_bin, _args, _opts, cb) => {
+      cb(null, `Config warnings: noisy prelude\n${GOOD_SKILLS_ARRAY_JSON}`, '');
+    };
+
+    const app = buildApp();
+    const res = await app.request('/api/skills');
+
+    expect(res.status).toBe(200);
+    const json = (await res.json()) as { ok: boolean; skills: Array<{ name: string }> };
+    expect(json.ok).toBe(true);
+    expect(json.skills).toHaveLength(2);
+    expect(json.skills[1].name).toBe('github');
   });
 
   it('fails loud when openclaw binary is missing', async () => {
