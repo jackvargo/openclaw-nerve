@@ -478,7 +478,7 @@ describe('executeTask', () => {
     expect(executed.status).toBe('in-progress');
     expect(executed.run).toBeDefined();
     expect(executed.run!.status).toBe('running');
-    expect(executed.run!.sessionKey).toContain(`kanban-run-${task.id}`);
+    expect(executed.run!.sessionKey).toMatch(new RegExp(`^kb-${task.id}-\\d+$`));
     expect(executed.run!.startedAt).toBeGreaterThan(0);
     expect(executed.run!.endedAt).toBeUndefined();
     expect(executed.version).toBe(task.version + 1);
@@ -991,6 +991,8 @@ describe('rejectProposal', () => {
 describe('listProposals', () => {
   it('lists all proposals', async () => {
     await store.createProposal({ type: 'create', payload: { title: 'A' }, proposedBy: 'agent:a' });
+    // Small delay to ensure distinct timestamps for stable sort order
+    await new Promise((r) => setTimeout(r, 5));
     await store.createProposal({ type: 'create', payload: { title: 'B' }, proposedBy: 'agent:b' });
 
     const all = await store.listProposals();

@@ -76,7 +76,7 @@ function pollSessionCompletion(
   taskId: string,
   label: string,
   intervalMs = 5_000,
-  maxAttempts = 360, // 30 minutes max
+  maxAttempts = 720, // 60 minutes max
 ): void {
   let attempts = 0;
 
@@ -93,7 +93,7 @@ function pollSessionCompletion(
       const task = await store.getTask(taskId).catch(() => null);
       if (!task || task.status !== 'in-progress') return; // task was moved/aborted, stop
 
-      const raw = await invokeGatewayTool('subagents', { action: 'list' });
+      const raw = await invokeGatewayTool('subagents', { action: 'list', recentMinutes: 120 });
       const parsed = parseGatewayResponse(raw);
 
       // subagents list returns { active: [...], recent: [...] }
@@ -101,7 +101,9 @@ function pollSessionCompletion(
       const recent = (parsed.recent ?? []) as Array<Record<string, unknown>>;
       const all = [...active, ...recent];
 
-      const match = all.find((s) => s.label === label);
+      // Labels are now kb-{slug}-{timestamp} (max ~47 chars), well under
+      // the gateway's ~50 char truncation limit. Exact match only.
+      const match = all.find((s) => String(s.label ?? '') === label);
 
       if (!match) {
         // Not found yet -- may not have registered, keep trying
@@ -710,7 +712,7 @@ app.post('/api/kanban/tasks/:id/execute', rateLimitGeneral, async (c) => {
     const spawnArgs: Record<string, unknown> = {
       task: `You are working on a Kanban task.\n\nTitle: ${task.title}\n\nDescription: ${taskDescription}\n\nDeliver your result as a clear summary of what was done.`,
       mode: 'run',
-      label: `kanban-run-${id}-${Date.now()}`,
+      label: task.run!.sessionKey,
     };
     // Use task's model, or board default. If neither is set, omit — OpenClaw
     // will use whatever default model the operator configured in openclaw.json.
@@ -720,7 +722,7 @@ app.post('/api/kanban/tasks/:id/execute', rateLimitGeneral, async (c) => {
     const thinking = task.thinking || config.defaultThinking;
     if (thinking) spawnArgs.thinking = thinking;
 
-    const runLabel = spawnArgs.label as string;
+    const runLabel = task.run!.sessionKey;
     invokeGatewayTool('sessions_spawn', spawnArgs)
       .then(() => {
         // Poll for session completion in the background

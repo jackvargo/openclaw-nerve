@@ -13,6 +13,28 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createMutex } from './mutex.js';
 
+// ── Helpers ──────────────────────────────────────────────────────────
+
+/** Derive a URL-safe slug from a task title, capped at `max` chars. */
+function slugify(title: string, max = 30): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')   // non-alphanumeric → dash
+    .replace(/^-+|-+$/g, '')        // trim leading/trailing dashes
+    .slice(0, max)
+    .replace(/-+$/, '');            // trim trailing dash after slice
+}
+
+/** Build a unique task ID from the title, appending -2, -3… on collision. */
+function uniqueSlugId(title: string, existingIds: Set<string>): string {
+  const base = slugify(title) || 'task';
+  if (!existingIds.has(base)) return base;
+  for (let i = 2; ; i++) {
+    const candidate = `${base}-${i}`;
+    if (!existingIds.has(candidate)) return candidate;
+  }
+}
+
 // ── Types ────────────────────────────────────────────────────────────
 
 export type TaskStatus = 'backlog' | 'todo' | 'in-progress' | 'review' | 'done' | 'cancelled';
@@ -407,8 +429,9 @@ export class KanbanStore {
         .reduce((max, t) => Math.max(max, t.columnOrder), -1);
 
       const now = Date.now();
+      const existingIds = new Set(data.tasks.map((t) => t.id));
       const task: KanbanTask = {
-        id: crypto.randomUUID(),
+        id: uniqueSlugId(input.title, existingIds),
         title: input.title,
         description: input.description,
         status: targetStatus,
@@ -618,7 +641,8 @@ export class KanbanStore {
       }
 
       const now = Date.now();
-      const sessionKey = `kanban-run-${id}-${now}`;
+      // Include a short timestamp suffix so reruns of the same task get unique session keys.
+      const sessionKey = `kb-${id}-${now}`;
 
       task.status = 'in-progress';
       task.run = {
@@ -1029,9 +1053,11 @@ export class KanbanStore {
       .reduce((max, t) => Math.max(max, t.columnOrder), -1);
 
     const now = Date.now();
+    const existingIds = new Set(data.tasks.map((t) => t.id));
+    const title = typeof payload.title === 'string' && payload.title ? payload.title : 'untitled';
     const task: KanbanTask = {
-      id: crypto.randomUUID(),
-      title: payload.title as string,
+      id: uniqueSlugId(title, existingIds),
+      title,
       description: payload.description as string | undefined,
       status: targetStatus,
       priority: (payload.priority as TaskPriority) ?? data.config.defaults.priority,
