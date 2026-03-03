@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.6] — 2026-03-03
+
+### Added
+- Live interim transcription preview in chat input during voice recording (PR #75)
+- OpenAI TTS voice options expanded to all 13 supported voices (PR #72)
+- Voice interaction sounds upgraded from oscillator beeps to custom MP3 effects (PR #70)
+
+### Changed
+- System notifications in chat now render as collapsible strips (PR #69)
+- Kanban task IDs and session labels are now human-readable (PR #67)
+
+### Fixed
+- Voice audio playback quality improvements (PR #74)
+- Chat panel remains mounted during tab switches to avoid voice/session disruption (PR #71)
+- Chat keydown handling now safely guards IME composition input (PR #68)
+
+---
+
 ## [1.4.5] — 2026-03-01
 
 ### Added
