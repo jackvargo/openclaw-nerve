@@ -10,6 +10,52 @@
   --font-sans: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
 }
 
+/* Default theme (nerve-dark) — applied before JS loads so login page has correct brand colors */
+:root {
+  --color-background: #0F172A;
+  --color-foreground: #CBD5E1;
+  --color-card: #1E293B;
+  --color-card-foreground: #CBD5E1;
+  --color-popover: #1E293B;
+  --color-popover-foreground: #CBD5E1;
+  --color-primary: #0891B2;
+  --color-primary-foreground: #F1F5F9;
+  --color-secondary: #1E293B;
+  --color-secondary-foreground: #CBD5E1;
+  --color-muted: #1E293B;
+  --color-muted-foreground: #64748B;
+  --color-accent: #1E293B;
+  --color-accent-foreground: #CBD5E1;
+  --color-destructive: #DC2626;
+  --color-destructive-foreground: #F1F5F9;
+  --color-border: #334155;
+  --color-input: #334155;
+  --color-ring: #22D3EE;
+  --color-green: #059669;
+  --color-red: #DC2626;
+  --color-orange: #D97706;
+  --color-purple: #8B5CF6;
+  --color-info: #22D3EE;
+  --color-message-user: #0C1322;
+  --color-message-assistant: #0F1A20;
+  --color-message-system: #0F1528;
+  --color-scrollbar: #334155;
+  --color-scrollbar-hover: #475569;
+  --color-sidebar: #0B1120;
+  --color-sidebar-foreground: #CBD5E1;
+  --color-sidebar-primary: #0891B2;
+  --color-sidebar-primary-foreground: #F1F5F9;
+  --color-sidebar-accent: #1E293B;
+  --color-sidebar-accent-foreground: #CBD5E1;
+  --color-sidebar-border: #334155;
+  --color-sidebar-ring: #22D3EE;
+  --color-chart-1: #0891B2;
+  --color-chart-2: #059669;
+  --color-chart-3: #22D3EE;
+  --color-chart-4: #DC2626;
+  --color-chart-5: #D97706;
+}
+
 @layer base {
   * {
     @apply border-border/60 outline-ring/50;
