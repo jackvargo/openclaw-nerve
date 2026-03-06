@@ -727,52 +727,52 @@
   --color-scrollbar-hover: var(--scrollbar-hover);
 }
 
-/* Default theme values (mission-control). Single source of truth for CSS defaults.
+/* Default theme values (nerve-dark / Vective brand). Single source of truth for CSS defaults.
    themes.ts applyTheme() overrides these at runtime via element.style.setProperty(). */
 :root {
   --radius: 0rem;
-  --background: #121212;
-  --foreground: #D4D4D4;
-  --card: #1a1a1a;
-  --card-foreground: #D4D4D4;
-  --popover: #1a1a1a;
-  --popover-foreground: #D4D4D4;
-  --primary: #E8A838;
-  --primary-foreground: #121212;
-  --secondary: #1e1e1e;
-  --secondary-foreground: #D4D4D4;
-  --muted: #1e1e1e;
-  --muted-foreground: #888888;
-  --accent: #1e1e1e;
-  --accent-foreground: #D4D4D4;
-  --destructive: #E74C3C;
-  --destructive-foreground: #D4D4D4;
-  --border: #333333;
-  --input: #333333;
-  --ring: #E8A838;
-  --green: #4CAF50;
-  --red: #E74C3C;
-  --orange: #E8A838;
-  --purple: #9B59B6;
-  --info: #3498DB;
-  --chart-1: #E8A838;
-  --chart-2: #4CAF50;
-  --chart-3: #9B59B6;
-  --chart-4: #E74C3C;
-  --chart-5: #3498DB;
-  --message-user: #1a1a20;
-  --message-assistant: #1a1e1a;
-  --message-system: #1a1a1e;
-  --scrollbar: #333333;
-  --scrollbar-hover: #666666;
-  --sidebar: #1a1a1a;
-  --sidebar-foreground: #D4D4D4;
-  --sidebar-primary: #E8A838;
-  --sidebar-primary-foreground: #121212;
-  --sidebar-accent: #1e1e1e;
-  --sidebar-accent-foreground: #D4D4D4;
-  --sidebar-border: #333333;
-  --sidebar-ring: #E8A838;
+  --background: #0F172A;
+  --foreground: #CBD5E1;
+  --card: #1E293B;
+  --card-foreground: #CBD5E1;
+  --popover: #1E293B;
+  --popover-foreground: #CBD5E1;
+  --primary: #0891B2;
+  --primary-foreground: #F1F5F9;
+  --secondary: #1E293B;
+  --secondary-foreground: #CBD5E1;
+  --muted: #1E293B;
+  --muted-foreground: #64748B;
+  --accent: #1E293B;
+  --accent-foreground: #CBD5E1;
+  --destructive: #DC2626;
+  --destructive-foreground: #F1F5F9;
+  --border: #334155;
+  --input: #334155;
+  --ring: #22D3EE;
+  --green: #059669;
+  --red: #DC2626;
+  --orange: #D97706;
+  --purple: #8B5CF6;
+  --info: #22D3EE;
+  --chart-1: #0891B2;
+  --chart-2: #059669;
+  --chart-3: #22D3EE;
+  --chart-4: #DC2626;
+  --chart-5: #D97706;
+  --message-user: #0C1322;
+  --message-assistant: #0F1A20;
+  --message-system: #0F1528;
+  --scrollbar: #334155;
+  --scrollbar-hover: #475569;
+  --sidebar: #0B1120;
+  --sidebar-foreground: #CBD5E1;
+  --sidebar-primary: #0891B2;
+  --sidebar-primary-foreground: #F1F5F9;
+  --sidebar-accent: #1E293B;
+  --sidebar-accent-foreground: #CBD5E1;
+  --sidebar-border: #334155;
+  --sidebar-ring: #22D3EE;
 }
 
 /* Activity indicator animations */
