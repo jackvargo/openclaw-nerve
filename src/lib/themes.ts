@@ -1,6 +1,8 @@
 // Theme definitions for Nerve UI
 
 export type ThemeName =
+  | 'nerve-dark'
+  | 'nerve-light'
   | 'midnight'
   | 'light'
   | 'phosphor'
@@ -23,6 +25,106 @@ export interface Theme {
 }
 
 export const themes: Record<ThemeName, Theme> = {
+  'nerve-dark': {
+    name: 'nerve-dark',
+    label: 'Nerve Dark',
+    colors: {
+      '--color-background': '#0F172A',
+      '--color-foreground': '#CBD5E1',
+      '--color-card': '#1E293B',
+      '--color-card-foreground': '#CBD5E1',
+      '--color-popover': '#1E293B',
+      '--color-popover-foreground': '#CBD5E1',
+      '--color-primary': '#0891B2',
+      '--color-primary-foreground': '#F1F5F9',
+      '--color-secondary': '#1E293B',
+      '--color-secondary-foreground': '#CBD5E1',
+      '--color-muted': '#1E293B',
+      '--color-muted-foreground': '#64748B',
+      '--color-accent': '#1E293B',
+      '--color-accent-foreground': '#CBD5E1',
+      '--color-destructive': '#DC2626',
+      '--color-destructive-foreground': '#F1F5F9',
+      '--color-border': '#334155',
+      '--color-input': '#334155',
+      '--color-ring': '#22D3EE',
+      '--color-green': '#059669',
+      '--color-red': '#DC2626',
+      '--color-orange': '#D97706',
+      '--color-purple': '#8B5CF6',
+      '--color-info': '#22D3EE',
+      '--color-message-user': '#0C1322',
+      '--color-message-assistant': '#0F1A20',
+      '--color-message-system': '#0F1528',
+      '--color-scrollbar': '#334155',
+      '--color-scrollbar-hover': '#475569',
+      // Sidebar colors
+      '--color-sidebar': '#0B1120',
+      '--color-sidebar-foreground': '#CBD5E1',
+      '--color-sidebar-primary': '#0891B2',
+      '--color-sidebar-primary-foreground': '#F1F5F9',
+      '--color-sidebar-accent': '#1E293B',
+      '--color-sidebar-accent-foreground': '#CBD5E1',
+      '--color-sidebar-border': '#334155',
+      '--color-sidebar-ring': '#22D3EE',
+      // Chart colors — Vective palette
+      '--color-chart-1': '#0891B2',
+      '--color-chart-2': '#059669',
+      '--color-chart-3': '#22D3EE',
+      '--color-chart-4': '#DC2626',
+      '--color-chart-5': '#D97706',
+    },
+  },
+  'nerve-light': {
+    name: 'nerve-light',
+    label: 'Nerve Light',
+    colors: {
+      '--color-background': '#FFFFFF',
+      '--color-foreground': '#334155',
+      '--color-card': '#FFFFFF',
+      '--color-card-foreground': '#334155',
+      '--color-popover': '#FFFFFF',
+      '--color-popover-foreground': '#334155',
+      '--color-primary': '#0891B2',
+      '--color-primary-foreground': '#FFFFFF',
+      '--color-secondary': '#F8FAFC',
+      '--color-secondary-foreground': '#334155',
+      '--color-muted': '#F1F5F9',
+      '--color-muted-foreground': '#64748B',
+      '--color-accent': '#F1F5F9',
+      '--color-accent-foreground': '#0F172A',
+      '--color-destructive': '#DC2626',
+      '--color-destructive-foreground': '#FFFFFF',
+      '--color-border': '#E2E8F0',
+      '--color-input': '#E2E8F0',
+      '--color-ring': '#0891B2',
+      '--color-green': '#059669',
+      '--color-red': '#DC2626',
+      '--color-orange': '#D97706',
+      '--color-purple': '#7C3AED',
+      '--color-info': '#0891B2',
+      '--color-message-user': '#F0FDFA',
+      '--color-message-assistant': '#F0FDF4',
+      '--color-message-system': '#F8FAFC',
+      '--color-scrollbar': '#CBD5E1',
+      '--color-scrollbar-hover': '#94A3B8',
+      // Sidebar colors
+      '--color-sidebar': '#F8FAFC',
+      '--color-sidebar-foreground': '#334155',
+      '--color-sidebar-primary': '#0891B2',
+      '--color-sidebar-primary-foreground': '#FFFFFF',
+      '--color-sidebar-accent': '#F1F5F9',
+      '--color-sidebar-accent-foreground': '#0F172A',
+      '--color-sidebar-border': '#E2E8F0',
+      '--color-sidebar-ring': '#0891B2',
+      // Chart colors
+      '--color-chart-1': '#0891B2',
+      '--color-chart-2': '#059669',
+      '--color-chart-3': '#7C3AED',
+      '--color-chart-4': '#DC2626',
+      '--color-chart-5': '#D97706',
+    },
+  },
   'midnight': {
     name: 'midnight',
     label: 'Midnight',
@@ -730,6 +832,8 @@ export const themeNames = Object.keys(themes) as ThemeName[];
 
 // Highlight.js theme mapping
 const hljsThemes: Record<ThemeName, string> = {
+  'nerve-dark': 'github-dark-dimmed',
+  'nerve-light': 'github',
   'midnight': 'github-dark-dimmed',
   'light': 'github',
   'phosphor': 'github-dark-dimmed',
