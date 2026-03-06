@@ -6,7 +6,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import NerveLogo from '../../components/NerveLogo';
+import VectiveMark from '../../components/VectiveMark';
 
 interface LoginPageProps {
   onLogin: (password: string) => Promise<void>;
@@ -38,12 +38,12 @@ export function LoginPage({ onLogin, error }: LoginPageProps) {
       <div className="w-full max-w-sm mx-4">
         {/* Logo / Title */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-2">
-            <NerveLogo size={36} />
+          <div className="flex items-center justify-center mb-3">
+            <VectiveMark size={48} />
           </div>
-          <div className="text-2xl font-bold text-primary mb-1">Nerve</div>
+          <div className="text-2xl font-bold text-primary mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Vective AI</div>
           <div className="text-xs text-muted-foreground font-mono tracking-wider uppercase">
-            Authentication Required
+            Nerve — Authentication Required
           </div>
         </div>
 

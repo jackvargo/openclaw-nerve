@@ -181,8 +181,8 @@ export function TopBar({
       <header className="flex items-center justify-between px-2 sm:px-4 h-[42px] bg-card border-b border-border shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <VectiveMark size={24} />
-          <span className="hidden sm:inline text-sm sm:text-base font-bold text-primary tracking-[2px] sm:tracking-[4px] uppercase truncate">
-            NERVE
+          <span className="hidden sm:inline text-sm sm:text-base font-bold text-primary tracking-[2px] sm:tracking-[4px] uppercase truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            VECTIVE AI
           </span>
 
           {/* View mode toggle */}
