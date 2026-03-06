@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo, lazy, Suspense, type
 import { Activity, BarChart3, Settings, Radio, Users, Brain, MessageSquare, LayoutGrid } from 'lucide-react';
 import type { ViewMode } from '@/features/command-palette/commands';
 import type { AgentLogEntry, EventEntry, TokenData } from '@/types';
-import NerveLogo from './NerveLogo';
+import VectiveMark from './VectiveMark';
 
 const AgentLog = lazy(() => import('@/features/activity/AgentLog').then(m => ({ default: m.AgentLog })));
 const EventLog = lazy(() => import('@/features/activity/EventLog').then(m => ({ default: m.EventLog })));
@@ -180,8 +180,8 @@ export function TopBar({
     <div className="relative z-40">
       <header className="flex items-center justify-between px-2 sm:px-4 h-[42px] bg-card border-b border-border shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <NerveLogo size={24} />
-          <span className="hidden sm:inline text-sm sm:text-base font-bold text-primary tracking-[2px] sm:tracking-[4px] [text-shadow:0_0_12px_rgba(232,168,56,0.5),0_0_24px_rgba(232,168,56,0.2)] uppercase truncate">
+          <VectiveMark size={24} />
+          <span className="hidden sm:inline text-sm sm:text-base font-bold text-primary tracking-[2px] sm:tracking-[4px] uppercase truncate">
             NERVE
           </span>
 
