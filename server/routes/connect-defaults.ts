@@ -19,16 +19,22 @@ import { getConnInfo } from '@hono/node-server/conninfo';
 const app = new Hono();
 
 app.get('/api/connect-defaults', rateLimitGeneral, (c) => {
-  // Derive WebSocket URL from the HTTP gateway URL
+  // Derive the internal gateway WS URL (used as ?target= param for the proxy)
   const gwUrl = config.gatewayUrl;
-  let wsUrl = '';
+  let gatewayWsUrl = '';
   try {
     const parsed = new URL(gwUrl);
     const wsProtocol = parsed.protocol === 'https:' ? 'wss:' : 'ws:';
-    wsUrl = `${wsProtocol}//${parsed.host}/ws`;
+    gatewayWsUrl = `${wsProtocol}//${parsed.host}`;
   } catch {
-    wsUrl = gwUrl.replace(/^http/, 'ws');
+    gatewayWsUrl = gwUrl.replace(/^http/, 'ws');
   }
+
+  // Build the browser-facing WS proxy URL using the request's Host header.
+  // The browser connects to Nerve's /ws proxy, which forwards to the gateway internally.
+  const requestHost = c.req.header('host') || `localhost:${config.port}`;
+  const reqProto = c.req.header('x-forwarded-proto') === 'https' ? 'wss:' : 'ws:';
+  const wsUrl = `${reqProto}//${requestHost}/ws?target=${encodeURIComponent(gatewayWsUrl)}`;
 
   let remoteAddress: string | undefined;
   try {
