@@ -40,6 +40,8 @@ const THEME_LABELS: Record<ThemeName, string> = {
   'ayu-dark': 'Ayu Dark',
   'rose-pine': 'Rosé Pine',
   'monochrome': 'Monochrome',
+  'nerve-dark': 'Nerve Dark',
+  'nerve-light': 'Nerve Light',
 };
 
 const FONT_LABELS: Record<FontName, string> = {
