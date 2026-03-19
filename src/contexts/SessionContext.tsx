@@ -14,6 +14,7 @@ import {
   pickDefaultSessionKey,
   isRootChildSession,
 } from '@/features/sessions/sessionKeys';
+import { buildSpawnSubagentMessage, type SubagentCleanupMode } from '@/features/sessions/buildSpawnSubagentMessage';
 
 const BUSY_STATES = new Set(['running', 'thinking', 'tool_use', 'delta', 'started']);
 const IDLE_STATES = new Set(['idle', 'done', 'error', 'final', 'aborted', 'completed']);
@@ -32,6 +33,7 @@ export interface SpawnSessionOpts {
   model?: string;
   thinking?: string;
   label?: string;
+  cleanup?: SubagentCleanupMode;
   agentName?: string;
   parentSessionKey?: string;
 }
@@ -105,6 +107,34 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     markSessionRead(key);
   }, [markSessionRead]);
 
+  const fetchHiddenCronSessions = useCallback(async (activeMinutes: number, limit: number): Promise<Session[]> => {
+    try {
+      const params = new URLSearchParams({
+        activeMinutes: String(activeMinutes),
+        limit: String(limit),
+      });
+      const res = await fetch(`/api/sessions/hidden?${params.toString()}`);
+      if (!res.ok) return [];
+      const data = await res.json() as { ok?: boolean; sessions?: Session[] };
+      return Array.isArray(data.sessions) ? data.sessions : [];
+    } catch {
+      return [];
+    }
+  }, []);
+
+  const mergeSessionLists = useCallback((primary: Session[], supplemental: Session[]): Session[] => {
+    if (supplemental.length === 0) return primary;
+    const merged = [...primary];
+    const seen = new Set(primary.map(getSessionKey));
+    for (const session of supplemental) {
+      const key = getSessionKey(session);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      merged.push(session);
+    }
+    return merged;
+  }, []);
+
   // Fetch agent name from server-info on mount
   useEffect(() => {
     const controller = new AbortController();
@@ -165,13 +195,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const listAuthoritativeSessions = useCallback(async () => {
     if (connectionState !== 'connected') return sessionsRef.current;
     try {
-      const res = await rpc('sessions.list', { limit: FULL_SESSIONS_LIMIT }) as SessionsListResponse;
-      return res?.sessions ?? [];
+      const [res, hiddenCronSessions] = await Promise.all([
+        rpc('sessions.list', { limit: FULL_SESSIONS_LIMIT }) as Promise<SessionsListResponse>,
+        fetchHiddenCronSessions(24 * 60, FULL_SESSIONS_LIMIT),
+      ]);
+      return mergeSessionLists(res?.sessions ?? [], hiddenCronSessions);
     } catch (err) {
       console.debug('[SessionContext] Failed to fetch authoritative session list:', err);
       return sessionsRef.current;
     }
-  }, [connectionState, rpc]);
+  }, [connectionState, fetchHiddenCronSessions, mergeSessionLists, rpc]);
 
   const setGranularStatus = useCallback((sessionKey: string, state: GranularAgentState) => {
     if (!sessionKey) return;
@@ -384,8 +417,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const refreshSessions = useCallback(async () => {
     if (connectionState !== 'connected') return;
     try {
-      const res = await rpc('sessions.list', { activeMinutes: SESSIONS_ACTIVE_MINUTES, limit: SESSIONS_LIMIT }) as SessionsListResponse;
-      const newSessions = res?.sessions || [];
+      const [res, hiddenCronSessions] = await Promise.all([
+        rpc('sessions.list', { activeMinutes: SESSIONS_ACTIVE_MINUTES, limit: SESSIONS_LIMIT }) as Promise<SessionsListResponse>,
+        fetchHiddenCronSessions(SESSIONS_ACTIVE_MINUTES, SESSIONS_LIMIT),
+      ]);
+      const newSessions = mergeSessionLists(res?.sessions || [], hiddenCronSessions);
       const nextCurrentSession = pickDefaultSessionKey(newSessions, currentSessionRef.current);
       
       // Smart diffing: preserve object references for unchanged sessions.
@@ -439,7 +475,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     } finally {
       setSessionsLoading(false);
     }
-  }, [rpc, connectionState]);
+  }, [connectionState, fetchHiddenCronSessions, mergeSessionLists, rpc]);
 
   // Update session in list from WebSocket event data
   const updateSessionFromEvent = useCallback((sessionKey: string, updates: Partial<Session>) => {
@@ -698,13 +734,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (!parentSessionKey) {
       throw new Error('Create a top-level agent before launching a subagent');
     }
-    const lines = ['[spawn-subagent]'];
-    lines.push(`task: ${opts.task}`);
-    if (opts.label) lines.push(`label: ${opts.label}`);
-    if (opts.model) lines.push(`model: ${opts.model}`);
-    if (opts.thinking && opts.thinking !== 'off') lines.push(`thinking: ${opts.thinking}`);
+    const message = buildSpawnSubagentMessage({
+      task: opts.task,
+      label: opts.label,
+      model: opts.model,
+      thinking: opts.thinking,
+      cleanup: opts.cleanup,
+    });
     const idempotencyKey = `spawn-subagent-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    await rpc('chat.send', { sessionKey: parentSessionKey, message: lines.join('\n'), idempotencyKey });
+    await rpc('chat.send', { sessionKey: parentSessionKey, message, idempotencyKey });
 
     // A spawned child can take a while to appear in sessions.list for non-main
     // roots, even after the parent agent accepts the request.
