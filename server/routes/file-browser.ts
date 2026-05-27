@@ -393,6 +393,76 @@ app.post('/api/files/restore', async (c) => {
   }
 });
 
+// ── POST /api/files/upload ───────────────────────────────────────────
+
+const MAX_UPLOAD_SIZE = 10_485_760; // 10 MB
+
+app.post('/api/files/upload', async (c) => {
+  const body = await c.req.parseBody();
+  const file = body['file'];
+  const targetDir = (body['directory'] as string) || '';
+
+  if (!file || !(file instanceof File)) {
+    return c.json({ ok: false, error: 'No file found in request' }, 400);
+  }
+
+  if (file.size > MAX_UPLOAD_SIZE) {
+    return c.json({ ok: false, error: `File too large (max ${MAX_UPLOAD_SIZE / 1024 / 1024}MB)` }, 413);
+  }
+
+  const sanitizedName = path.basename(file.name || 'upload').replace(/[<>:"|?*\x00-\x1F]/g, '_');
+  if (!sanitizedName || sanitizedName === '.' || sanitizedName === '..') {
+    return c.json({ ok: false, error: 'Invalid file name' }, 400);
+  }
+
+  const relativePath = targetDir ? path.join(targetDir, sanitizedName) : sanitizedName;
+  const resolved = await resolveWorkspacePath(relativePath, { allowNonExistent: true });
+  if (!resolved) {
+    return c.json({ ok: false, error: 'Invalid target directory' }, 403);
+  }
+
+  // Deduplicate: if file already exists, add a numeric suffix
+  let finalPath = resolved;
+  let finalRelative = relativePath;
+  try {
+    await fs.access(finalPath);
+    const ext = path.extname(sanitizedName);
+    const base = sanitizedName.slice(0, -ext.length || undefined);
+    for (let i = 1; i < 100; i++) {
+      const candidate = `${base} (${i})${ext}`;
+      const candidateRel = targetDir ? path.join(targetDir, candidate) : candidate;
+      const candidateAbs = await resolveWorkspacePath(candidateRel, { allowNonExistent: true });
+      if (!candidateAbs) continue;
+      try {
+        await fs.access(candidateAbs);
+      } catch {
+        finalPath = candidateAbs;
+        finalRelative = candidateRel;
+        break;
+      }
+    }
+  } catch {
+    // File doesn't exist — use original path
+  }
+
+  await fs.mkdir(path.dirname(finalPath), { recursive: true });
+
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await fs.writeFile(finalPath, buffer);
+    const stat = await fs.stat(finalPath);
+    return c.json({
+      ok: true,
+      path: finalRelative,
+      name: path.basename(finalPath),
+      size: stat.size,
+      mtime: Math.floor(stat.mtimeMs),
+    });
+  } catch {
+    return c.json({ ok: false, error: 'Failed to write uploaded file' }, 500);
+  }
+});
+
 // ── GET /api/files/raw ───────────────────────────────────────────────
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.svg', '.ico']);

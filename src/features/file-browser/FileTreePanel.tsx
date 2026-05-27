@@ -6,7 +6,7 @@
  */
 
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { PanelLeftClose, RefreshCw, Pencil, Trash2, RotateCcw, X } from 'lucide-react';
+import { PanelLeftClose, RefreshCw, Pencil, Trash2, RotateCcw, X, Upload } from 'lucide-react';
 import { FileTreeNode } from './FileTreeNode';
 import { useFileTree } from './hooks/useFileTree';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -127,6 +127,11 @@ export function FileTreePanel({
   // Permanent delete confirmation state
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ entry: TreeEntry } | null>(null);
 
+  // File upload state
+  const uploadInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [externalDragOver, setExternalDragOver] = useState(false);
+
   const clearToastTimer = useCallback(() => {
     if (toastTimerRef.current !== null) {
       window.clearTimeout(toastTimerRef.current);
@@ -151,6 +156,58 @@ export function FileTreePanel({
   }, [clearToastTimer]);
 
   useEffect(() => () => clearToastTimer(), [clearToastTimer]);
+
+  const uploadFiles = useCallback(async (files: FileList | File[], targetDir = '') => {
+    if (files.length === 0) return;
+    setIsUploading(true);
+    const results = await Promise.allSettled(
+      Array.from(files).map(async (file) => {
+        const form = new FormData();
+        form.append('file', file);
+        form.append('directory', targetDir);
+        const res = await fetch('/api/files/upload', { method: 'POST', body: form });
+        const data = await res.json() as { ok?: boolean; error?: string; name?: string };
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Upload failed');
+        return data.name || file.name;
+      })
+    );
+    setIsUploading(false);
+    refresh();
+
+    const succeeded = results.filter((r): r is PromiseFulfilledResult<string> => r.status === 'fulfilled');
+    const failed = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
+
+    if (failed.length === 0) {
+      const names = succeeded.map(r => r.value).join(', ');
+      showToast({ type: 'success', message: `Uploaded ${succeeded.length === 1 ? names : `${succeeded.length} files`}` }, 3000);
+    } else {
+      const errMsg = failed[0].reason instanceof Error ? failed[0].reason.message : 'Upload failed';
+      showToast({ type: 'error', message: `${errMsg}${failed.length > 1 ? ` (+${failed.length - 1} more)` : ''}` }, 4500);
+    }
+  }, [refresh, showToast]);
+
+  const handleExternalDragOver = useCallback((e: React.DragEvent) => {
+    if (dragSource) return;
+    if (!e.dataTransfer.types.includes('Files')) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    setExternalDragOver(true);
+  }, [dragSource]);
+
+  const handleExternalDragLeave = useCallback((e: React.DragEvent) => {
+    if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+    setExternalDragOver(false);
+  }, []);
+
+  const handleExternalDrop = useCallback((e: React.DragEvent) => {
+    if (dragSource) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setExternalDragOver(false);
+    if (e.dataTransfer.files.length > 0) {
+      void uploadFiles(e.dataTransfer.files);
+    }
+  }, [dragSource, uploadFiles]);
 
   // Close context menu on outside click / escape
   useEffect(() => {
@@ -563,7 +620,16 @@ export function FileTreePanel({
           <span className="text-[10px] font-mono font-semibold uppercase tracking-[0.26em] text-muted-foreground">
             {workspaceInfo?.isCustomWorkspace ? workspaceInfo.rootPath : 'Workspace'}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => uploadInputRef.current?.click()}
+              disabled={isUploading}
+              className="shell-icon-button size-10 px-0"
+              title="Upload files"
+              aria-label="Upload files to workspace"
+            >
+              {isUploading ? <RefreshCw size={16} className="animate-spin" /> : <Upload size={16} />}
+            </button>
             <button
               onClick={refresh}
               className="shell-icon-button size-10 px-0"
@@ -583,8 +649,36 @@ export function FileTreePanel({
           </div>
         </div>
 
+        <input
+          ref={uploadInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files && e.target.files.length > 0) {
+              void uploadFiles(e.target.files);
+              e.target.value = '';
+            }
+          }}
+        />
+
         {/* Tree content */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden py-1" role="tree" aria-label="File explorer">
+        <div
+          className={`relative flex-1 overflow-y-auto overflow-x-hidden py-1 ${externalDragOver ? 'ring-2 ring-inset ring-primary/50' : ''}`}
+          role="tree"
+          aria-label="File explorer"
+          onDragOver={handleExternalDragOver}
+          onDragLeave={handleExternalDragLeave}
+          onDrop={handleExternalDrop}
+        >
+          {externalDragOver && (
+            <div className="absolute inset-0 z-40 flex items-center justify-center bg-primary/8 backdrop-blur-[2px] pointer-events-none">
+              <div className="flex items-center gap-2 rounded-xl bg-card/95 border border-primary/30 px-4 py-2.5 text-xs text-primary shadow-lg">
+                <Upload size={14} />
+                Drop files to upload
+              </div>
+            </div>
+          )}
           {loading ? (
             <div className="flex items-center gap-2 px-3 py-4 text-xs text-muted-foreground">
               <RefreshCw className="animate-spin" size={12} />
